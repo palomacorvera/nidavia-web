@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Resultados de búsqueda · Nidavia</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+  /* Buscar: comportamiento del “quitar filtro” en los chips */
+  .filters-applied .chip .x {
+    cursor:pointer;
+    opacity:.7;
+    text-decoration:none;
+  }
+  .filters-applied .chip .x:hover { opacity:1; }
+  </style>
+</head>
+<body>
+  <header id="header-placeholder" class="header loading">
+  <div class="container nav">
+    <div class="brand-lockup" style="opacity:.5;">Cargando...</div>
+  </div>
+</header>
+
+  <main class="section">
+    <div class="container">
+      <div class="head">
+        <h1>Resultados de búsqueda</h1>
+        <div id="summary" class="filters-applied"></div>
+      </div>
+
+      <!-- Barra de filtros -->
+      <div class="filters-bar">
+        <div class="search" role="search" aria-label="Refinar búsqueda">
+          <form id="filter-form" class="search-grid" action="buscar.html" method="GET">
+            <label class="field" aria-label="Ubicación">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 22s7-5.686 7-12a7 7 0 1 0-14 0c0 6.314 7 12 7 12Z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
+              <input type="text" name="u" placeholder="Ubicación, barrio o CP">
+            </label>
+            <label class="field" aria-label="Tipo">
+              <select name="tipo">
+                <option value="">Tipo</option>
+                <option value="piso">Piso</option>
+                <option value="chalet">Chalet</option>
+                <option value="atico">Ático</option>
+                <option value="duplex">Dúplex</option>
+              </select>
+            </label>
+            <label class="field" aria-label="Precio mínimo">
+              <select name="min">
+                <option value="">Precio mín.</option>
+                <option value="100000">100.000 €</option>
+                <option value="200000">200.000 €</option>
+                <option value="300000">300.000 €</option>
+                <option value="500000">500.000 €</option>
+              </select>
+            </label>
+            <label class="field" aria-label="Precio máximo">
+              <select name="max">
+                <option value="">Precio máx.</option>
+                <option value="300000">300.000 €</option>
+                <option value="500000">500.000 €</option>
+                <option value="800000">800.000 €</option>
+                <option value="1000000">1.000.000 €</option>
+              </select>
+            </label>
+            <button class="btn btn-primary" type="submit">Aplicar filtros</button>
+          </form>
+          <div style="margin-top:8px">
+            <a id="clear" class="ghost-link" href="buscar.html">Borrar filtros</a>
+          </div>
+        </div>
+      </div>
+
+      <p id="count" style="margin:.9rem 0 0;color:var(--text-secondary)"></p>
+      <div id="results" class="cards" style="margin-top:18px"></div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { loadPartials } from "./js/partials-loader.js";
+    import { db } from "./js/firebase-config.js";
+    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { initAuthUI } from "./js/auth-state.js";
+    await loadPartials();
+  initAuthUI();
+  
+    // === Helpers ===
+    const euros = n => new Intl.NumberFormat('es-ES').format(n) + ' €';
+    const esc   = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+    const norm  = s => (s ?? '').toString().normalize('NFD').replace(/\p{Diacritic}/gu,'').toLowerCase().trim();
+
+    const getRawType = p => p.type ?? p.property_type ?? p.tipo ?? p.category ?? p.t ?? p.tag ?? '';
+    const getType    = p => norm(getRawType(p));
+
+    const parsePrice = v => {
+      if (typeof v === 'number') return v;
+      const s = String(v ?? '').replace(/[^\d]/g,'');
+      return s ? Number(s) : 0;
+    };
+    const getPrice = p => parsePrice(p.price ?? p.precio ?? p.price_eur ?? p.p);
+
+    const ICON_HOME = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 21V9l9-6 9 6v12H3Z" stroke="currentColor" stroke-width="1.5"/></svg>';
+    const ICON_BED  = '<svg viewBox="0 0 24 24"><path d="M4 10h16M6 10v8m12-8v8M8 18h8" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
+    const ICON_BATH = '<svg viewBox="0 0 24 24"><path d="M7 10h10a2 2 0 0 1 2 2v6H5v-6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
+    const ICON_AREA = '<svg viewBox="0 0 24 24"><path d="M4 20h16M4 4h16M4 12h16" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
+
+    const priceText = p => p.operation === 'alquiler' ? euros(getPrice(p)) + ' /mes' : euros(getPrice(p));
+
+    // === Card Template ===
+    function cardTemplate(p){
+      const imgs = (p.gallery && p.gallery.length ? p.gallery : [p.image])
+        .map((src,i)=>`<img loading="lazy" src="${esc(src)}" alt="${esc(p.title)} – foto ${i+1}">`)
+        .join('');
+      const ARROW_LEFT  = '<svg viewBox="0 0 24 24" fill="none"><path d="M15 5 8 12l7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      const ARROW_RIGHT = '<svg viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      const detailUrl = p.slug ? `detalle.html?slug=${encodeURIComponent(p.slug)}` :
+                      (p.id ? `detalle.html?id=${encodeURIComponent(p.id)}` : `detalle.html`);
+      return `
+      <article class="card">
+        <div class="card-media">
+          <div class="media-carousel" data-index="0">
+            <div class="media-track">${imgs}</div>
+            ${(p.gallery && p.gallery.length > 1) ? `
+              <button class="media-nav media-prev" aria-label="Imagen anterior">${ARROW_LEFT}</button>
+              <button class="media-nav media-next" aria-label="Imagen siguiente">${ARROW_RIGHT}</button>` : ``}
+          </div>
+          <span class="badge">${priceText(p)}</span>
+          ${p.tag ? `<span class="ribbon">${esc(p.tag)}</span>` : ''}
+        </div>
+
+        <div class="card-body">
+          <div class="card-title">
+            <h3>${esc(p.title)}</h3>
+            <span class="chip">${ICON_HOME} ${esc(p.operation ? (p.operation[0].toUpperCase()+p.operation.slice(1)) : '—')}</span>
+          </div>
+          <div class="meta">
+            ${p.bedrooms ? `<span>${ICON_BED} ${p.bedrooms} hab</span>` : ''}
+            ${p.bathrooms ? `<span>${ICON_BATH} ${p.bathrooms} baños</span>` : ''}
+            ${p.area_m2 ? `<span>${ICON_AREA} ${p.area_m2} m²</span>` : ''}
+          </div>
+          <div class="location">${esc(p.address ?? '')}</div>
+          <div class="card-actions">
+            <a class="ghost-link" href="${detailUrl}">Ver detalle</a>
+            <a class="btn btn-outline" href="solicitar-visita.html?property=${encodeURIComponent(p.title)}">Solicitar visita</a>
+          </div>
+        </div>
+      </article>`;
+    }
+
+    function initCarousels(scopeSelector){
+      document.querySelectorAll(`${scopeSelector} .media-carousel`).forEach(carousel=>{
+        const track = carousel.querySelector('.media-track');
+        const slides = track.children;
+        let idx = 0;
+        const update = ()=>{ track.style.transform = `translateX(-${idx*100}%)`; };
+        carousel.querySelector('.media-prev')?.addEventListener('click', e=>{
+          e.preventDefault(); idx = (idx - 1 + slides.length) % slides.length; update();
+        });
+        carousel.querySelector('.media-next')?.addEventListener('click', e=>{
+          e.preventDefault(); idx = (idx + 1) % slides.length; update();
+        });
+        let startX = null;
+        track.addEventListener('touchstart', e=>{ startX = e.touches[0].clientX; }, {passive:true});
+        track.addEventListener('touchend', e=>{
+          if(startX===null) return;
+          const dx = e.changedTouches[0].clientX - startX;
+          if(Math.abs(dx) > 50){
+            idx = (dx < 0) ? (idx + 1) % slides.length : (idx - 1 + slides.length) % slides.length;
+            update();
+          }
+          startX = null;
+        });
+        update();
+      });
+    }
+
+    // === Parámetros de búsqueda ===
+    const params = new URLSearchParams(location.search);
+    const qTipo = norm(params.get('tipo') || '');
+    const qMin  = Number(params.get('min') || '') || null;
+    const qMax  = Number(params.get('max') || '') || null;
+    const qUbic = norm(params.get('u') || '');
+
+    // Rellenar formulario
+    const form = document.getElementById('filter-form');
+    form.tipo.value = params.get('tipo') || '';
+    form.min.value  = params.get('min')  || '';
+    form.max.value  = params.get('max')  || '';
+    form.u.value    = params.get('u')    || '';
+
+    // === Chips de filtros activos ===
+    const summary = document.getElementById('summary');
+    function addChip(label, key){
+      const a = new URLSearchParams(params);
+      a.delete(key);
+      const url = 'buscar.html' + (a.toString() ? ('?' + a.toString()) : '');
+      const chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.innerHTML = `${label} <a class="x" href="${url}" title="Quitar">✕</a>`;
+      summary.appendChild(chip);
+    }
+    if (qTipo) addChip(`Tipo: ${params.get('tipo')}`, 'tipo');
+    if (qMin)  addChip(`Mín: ${euros(qMin)}`, 'min');
+    if (qMax)  addChip(`Máx: ${euros(qMax)}`, 'max');
+    if (qUbic) addChip(`Ubicación: ${params.get('u')}`, 'u');
+    if (!qTipo && !qMin && !qMax && !qUbic){
+      summary.innerHTML = '<span style="color:var(--text-secondary)">Sin filtros activos</span>';
+    }
+
+    // === Cargar propiedades desde Firebase y filtrar ===
+    async function loadSearchResults() {
+      try {
+        const querySnapshot = await getDocs(collection(db, "properties"));
+        const all = [];
+        querySnapshot.forEach(doc => all.push({ id: doc.id, ...doc.data() }));
+        const filtered = all.filter(p => {
+          const typeOk = !qTipo || getType(p) === qTipo;
+          const price  = getPrice(p);
+          const minOk  = (qMin === null) || (price >= qMin);
+          const maxOk  = (qMax === null) || (price <= qMax);
+          const locOk  = !qUbic || norm(p.address ?? '').includes(qUbic);
+          return typeOk && minOk && maxOk && locOk;
+        });
+        const grid = document.getElementById('results');
+        document.getElementById('count').textContent =
+          `${filtered.length} resultado${filtered.length !== 1 ? 's' : ''}`;
+        if (filtered.length){
+          grid.innerHTML = filtered.map(cardTemplate).join('');
+          initCarousels('#results');
+        } else {
+          grid.innerHTML = `<p style="color:var(--text-secondary)">No hay propiedades que cumplan esos filtros.</p>`;
+        }
+        console.log(`✅ Cargadas ${filtered.length} propiedades filtradas desde Firebase`);
+      } catch(e) {
+        console.error("❌ Error al cargar propiedades desde Firestore:", e);
+        document.getElementById('results').innerHTML =
+          `<p style="color:var(--text-secondary)">No se pudieron cargar las propiedades.</p>`;
+      }
+    }
+
+    loadSearchResults();
+  </script>
+
+  <script type="module" src="js/newsletter.js"></script>
+</body>
+</html>

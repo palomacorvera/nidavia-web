@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contacto · Nidavia</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+  /* Hero de Contacto: solo el fondo de esta página */
+.hero{
+  background:
+    linear-gradient(90deg, rgba(19,41,61,.92) 0%, rgba(14,28,42,.88) 60%, rgba(14,28,42,.7) 100%),
+    url("https://images.unsplash.com/photo-1496302662116-85c14692f2b4?q=80&w=1800&auto=format&fit=crop") center/cover no-repeat;
+  color:#fff;
+}
+
+/* Panel y layout de la página */
+.panel{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--radius-xl);
+  box-shadow:var(--shadow-soft);
+  padding:26px;
+}
+.panel-grid{
+  display:grid;
+  grid-template-columns:1.05fr .95fr;
+  gap:28px;
+  align-items:start;
+}
+@media (max-width:980px){ .panel-grid{ grid-template-columns:1fr } }
+
+/* Caja lateral de contacto */
+.contact-box{ display:grid; gap:10px }
+.contact-item{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  gap:12px;
+  align-items:center;
+  padding:16px 8px;
+  border-top:1px solid var(--border);
+}
+.contact-item:first-child{ border-top:0 }
+.ci-icon{
+  width:46px; height:46px; border-radius:12px; display:grid; place-items:center;
+  background:linear-gradient(135deg,#0E1C2A,#13293D); color:#fff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+.ci-icon svg{ width:22px; height:22px }
+.ci-title{ font-weight:700 }
+.ci-sub{ color:var(--text-secondary); margin-top:2px }
+
+/* Form: ajustes específicos de esta página */
+.field--multiline{ align-items:flex-start }   /* el svg ya lo cubre main.css */
+.consent{ align-items:flex-start; font-size:.95rem }
+.consent input{ margin-top:.2rem }
+
+/* CTA inferior (reutilizable) */
+.cta{
+  background:var(--brand-primary);
+  color:#fff;
+  border-radius:var(--radius-xl);
+  padding:26px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  border:1px solid rgba(255,255,255,.08);
+}
+.cta .btn-outline{ background:#fff; color:var(--brand-primary); border-color:#fff }
+.cta .btn-outline:hover{ filter:brightness(.95) }
+@media (max-width:760px){ .cta{ flex-direction:column; align-items:flex-start } }
+
+
+</style>
+</head>
+<body>
+<header id="header-placeholder" class="header loading">
+  <div class="container nav">
+    <div class="brand-lockup" style="opacity:.5;">Cargando...</div>
+  </div>
+</header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <span class="kicker">Contacto</span>
+      <h1>Hablemos de tu vivienda o proyecto</h1>
+      <p>Te respondemos en menos de 24 h. Un asesor senior te acompañará durante todo el proceso.</p>
+    </div>
+  </section>
+
+  <!-- ===== CONTENIDO ===== -->
+  <main class="section">
+    <div class="container panel">
+      <div class="panel-grid">
+        <!-- Formulario -->
+        <div>
+          <div class="head"><h2>Envíanos tu consulta</h2></div>
+          <form id="contact-form" novalidate>
+            <div class="fields">
+              <label class="field" aria-label="Nombre completo">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm-8 9a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.6"/></svg>
+                <input type="text" name="name" placeholder="Nombre completo *" required>
+              </label>
+              <label class="field" aria-label="Email">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18v12H3V6Z" stroke="currentColor" stroke-width="1.6"/><path d="m3 7 9 6 9-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+                <input type="email" name="email" placeholder="Email *" required>
+              </label>
+              <label class="field" aria-label="Teléfono">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M4 5a2 2 0 0 1 2-2h2l2 4-2 2a12 12 0 0 0 6 6l2-2 4 2v2a2 2 0 0 1-2 2h-1C9.82 19 5 14.18 5 8V7a2 2 0 0 1-1-2Z" stroke="currentColor" stroke-width="1.6"/></svg>
+                <input type="tel" name="phone" placeholder="Teléfono (opcional)">
+              </label>
+              <label class="field" aria-label="Motivo de contacto">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M4 4h16v6H4zM4 14h10v6H4z" stroke="currentColor" stroke-width="1.6"/></svg>
+                <select name="reason">
+                  <option value="">Motivo</option>
+                  <option>Vender mi vivienda</option>
+                  <option>Comprar vivienda</option>
+                  <option>Alquilar mi vivienda</option>
+                  <option>Valorar mi inmueble</option>
+                  <option>Otros</option>
+                </select>
+              </label>
+              <input type="text" name="company" style="position:absolute;left:-9999px" tabindex="-1" autocomplete="off" aria-hidden="true">
+            </div>
+
+            <div class="form-row">
+              <label class="field field--multiline" aria-label="Mensaje">
+  <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16v10H7l-3 3V6Z" stroke="currentColor" stroke-width="1.6"/></svg>
+  <textarea name="message" placeholder="Cuéntanos qué necesitas *" required></textarea>
+</label>
+
+              <label class="consent">
+                <input type="checkbox" name="gdpr" required>
+                <span>Acepto la <a class="ghost-link" href="#">Política de privacidad</a>. *</span>
+              </label>
+              <span id="form-error" class="help">Por favor, revisa los campos marcados.</span>
+              <div id="form-success" class="success" role="status" aria-live="polite">¡Gracias! Hemos recibido tu consulta y te contactaremos en breve.</div>
+              <div style="display:flex;gap:10px;justify-content:flex-end">
+                <button type="reset" class="btn btn-outline">Limpiar</button>
+                <button id="send-btn" type="submit" class="btn btn-primary">Enviar consulta</button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Datos de contacto -->
+        <aside aria-label="Datos de contacto" class="contact-box">
+          <div class="head" style="margin-bottom:6px"><h2 style="font-size:1.4rem">Cómo encontrarnos</h2></div>
+
+          <div class="contact-item">
+            <div class="ci-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 5a2 2 0 0 1 2-2h2l2 4-2 2a12 12 0 0 0 6 6l2-2 4 2v2a2 2 0 0 1-2 2h-1C9.82 19 5 14.18 5 8V7a2 2 0 0 1-1-2Z" stroke="currentColor" stroke-width="1.6"/></svg>
+            </div>
+            <div>
+              <div class="ci-title"><a href="tel:+34900111222">+34 900 111 222</a></div>
+              <div class="ci-sub">Teléfono</div>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <div class="ci-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 0 1 14.95-6.36A9 9 0 0 1 12 21a8.9 8.9 0 0 1-4.28-1.1L3 21l1.1-4.28A8.9 8.9 0 0 1 3 12Z" stroke="currentColor" stroke-width="1.6"/><path d="M8 8c.5 2.5 2.5 4.5 5 5l2-2 2 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <div class="ci-title"><a class="ghost-link" href="https://wa.me/34600111222?text=Hola,%20me%20gustaría%20información" target="_blank" rel="noopener">Escríbenos por WhatsApp</a></div>
+              <div class="ci-sub">Respuesta rápida</div>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <div class="ci-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18v12H3V6Z" stroke="currentColor" stroke-width="1.6"/><path d="m3 7 9 6 9-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <div class="ci-title"><a href="mailto:info@nidavia.es">info@nidavia.es</a></div>
+              <div class="ci-sub">Email</div>
+            </div>
+          </div>
+
+          <div class="contact-item" style="margin-top:4px">
+            <div class="ci-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            </div>
+            <div>
+              <div class="ci-title">L–V 9:30–19:00 · Sáb 10:00–14:00</div>
+              <div class="ci-sub">Horario</div>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <div class="ci-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 22s7-5.686 7-12a7 7 0 1 0-14 0c0 6.314 7 12 7 12Z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.6"/></svg>
+            </div>
+            <div>
+              <div class="ci-title">C/ Ejemplo 123, 4º, 48000 Bilbao</div>
+              <div class="ci-sub">Oficina</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== CTA ===== -->
+  <section class="section" style="padding-top:24px; padding-bottom:20px;">
+    <div class="container">
+      <div class="cta">
+        <div>
+          <h3 style="margin:.2rem 0 6px">¿Prefieres hablar ahora?</h3>
+          <p style="margin:0;opacity:.95">Llámanos y en 5 minutos te orientamos sobre el mejor siguiente paso.</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a class="btn btn-outline" href="tel:+34900111222">Llamar</a>
+          <a class="btn btn-primary" href="https://wa.me/34600111222?text=Hola" target="_blank" rel="noopener">WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<script type="module">
+  import { loadPartials } from "./js/partials-loader.js";
+    import { db } from "./js/firebase-config.js";
+    import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { initAuthUI } from "./js/auth-state.js";
+    await loadPartials();
+  initAuthUI();
+
+  // Año footer y cierre del offcanvas
+  document.getElementById('y').textContent = new Date().getFullYear();
+  document.querySelectorAll('.offcanvas a').forEach(a =>
+    a.addEventListener('click', () => {
+      document.querySelector('.offcanvas').classList.remove('open');
+    })
+  );
+
+  // Referencias
+  const form = document.getElementById('contact-form');
+  const errorBox = document.getElementById('form-error');
+  const successBox = document.getElementById('form-success');
+  const sendBtn = document.getElementById('send-btn');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorBox.style.display = 'none';
+    successBox.style.display = 'none';
+
+    const data = new FormData(form);
+    const name = (data.get('name') || '').trim();
+    const email = (data.get('email') || '').trim();
+    const phone = (data.get('phone') || '').trim();
+    const reason = (data.get('reason') || '').trim();
+    const message = (data.get('message') || '').trim();
+    const gdpr = data.get('gdpr') === 'on';
+    const botTrap = data.get('company');
+
+    if (!name || !email || !message || !gdpr || botTrap) {
+      errorBox.style.display = 'block';
+      return;
+    }
+
+    sendBtn.disabled = true;
+    sendBtn.textContent = 'Enviando…';
+
+    try {
+      console.log("⏳ Enviando datos a Firestore...");
+      await addDoc(collection(db, "consultas"), {
+        name,
+        email,
+        phone,
+        reason,
+        message,
+        createdAt: serverTimestamp()
+      });
+
+      console.log("✅ Consulta guardada correctamente");
+
+      // Mostrar mensaje de éxito en la misma página
+      successBox.style.display = 'block';
+      form.reset();
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'Enviar consulta';
+
+      // Desplazar suavemente hasta el mensaje
+      successBox.scrollIntoView({ behavior: "smooth", block: "center" });
+    } catch (err) {
+      console.error("❌ Error al guardar la consulta:", err);
+      errorBox.textContent = "Error al enviar la consulta. Inténtalo más tarde.";
+      errorBox.style.display = 'block';
+      sendBtn.disabled = false;
+      sendBtn.textContent = 'Enviar consulta';
+    }
+  });
+</script>
+<script type="module" src="js/newsletter.js"></script>
+</body>
+</html>

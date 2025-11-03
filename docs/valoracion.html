@@ -1,0 +1,673 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Valoración de vivienda · Nidavia</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+
+/* Tokens usados en etiquetas/avisos del resultado */
+:root{
+  --ok:#0f5132;
+  --okbg:#effaf4;
+  --err:#ba1a1a;
+  --warn:#b54708;
+}
+
+/* Hero de esta página (si prefieres, crea .hero--valoracion y aplícala en el HTML) */
+.hero{
+  background:
+    linear-gradient(90deg, rgba(19,41,61,.92) 0%, rgba(14,28,42,.88) 60%, rgba(14,28,42,.7) 100%),
+    url("https://images.unsplash.com/photo-1479839672679-a46483c0e7c8?q=80&w=1800&auto=format&fit=crop")
+    center/cover no-repeat;
+}
+
+/* Módulo de valoración: contenedor y layout */
+.panel{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--radius-xl);
+  box-shadow:var(--shadow-soft);
+  padding:26px;
+}
+.panel-grid{
+  display:grid;
+  grid-template-columns:1.1fr .9fr;
+  gap:28px;
+  align-items:start;
+}
+@media (max-width:980px){
+  .panel-grid{ grid-template-columns:1fr; }
+}
+
+/* Afinado de densidad y breakpoint SOLO en esta página */
+.panel .field{ padding:1.05rem 1.15rem; }
+@media (max-width:760px){
+  .panel .fields{ grid-template-columns:1fr; }
+}
+
+/* Resultados */
+.result{ position:static; top:auto; }
+/* usamos la card global y solo añadimos padding dentro del bloque de resultados */
+.result .card{ padding:18px; }
+
+.price{
+  font-size:clamp(1.6rem,1.2vw + 1.6rem,2.4rem);
+  margin:.2rem 0 .4rem;
+}
+.range{ color:var(--text-secondary); font-weight:600; }
+
+.pill{
+  display:inline-flex;
+  align-items:center;
+  gap:.4rem;
+  border:1px solid var(--border);
+  border-radius:999px;
+  padding:.3rem .6rem;
+  background:#fff;
+  color:var(--brand-primary);
+  font-weight:600;
+}
+.ok{ background:var(--okbg); border-color:#b7e5cc; color:var(--ok); }
+.warn{ background:#fff7ed; border-color:#fed7aa; color:var(--warn); }
+
+.breakdown{ margin-top:10px; display:grid; gap:6px; }
+.breakdown .row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  border-bottom:1px dashed #e8edf3;
+  padding:6px 0;
+}
+.row .note{ color:var(--text-secondary); }
+
+.muted{ color:var(--text-secondary); }
+.small{ font-size:.92rem; }
+
+  </style>
+</head>
+<body>
+  <header id="header-placeholder" class="header loading">
+  <div class="container nav">
+    <div class="brand-lockup" style="opacity:.5;">Cargando...</div>
+  </div>
+</header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <span class="kicker">Valoración</span>
+      <h1>Calcula el precio aproximado de tu vivienda</h1>
+      <p>Usamos €/m² por barrio y ajustes por m², planta, estado, terraza, garaje y más. Resultado inmediato y orientativo.</p>
+    </div>
+  </section>
+
+  <!-- ===== CONTENIDO ===== -->
+  <main class="section">
+    <div class="container panel">
+      <div class="panel-grid">
+        <!-- ===== Formulario de inputs ===== -->
+        <div>
+          <div class="head"><h2>Datos de tu vivienda</h2></div>
+
+          <form id="val-form" class="fields" novalidate>
+            <!-- Ubicación / tipo -->
+            <label class="field" title="Barrio">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 22s7-5.686 7-12a7 7 0 1 0-14 0c0 6.314 7 12 7 12Z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.6"/></svg>
+              <select name="barrio" required>
+                <option value="">Barrio (Madrid)</option>
+                <!-- PRIME -->
+                <optgroup label="Prime">
+                  <option value="recoletos">Salamanca – Recoletos</option>
+                  <option value="castellana">Salamanca – Castellana</option>
+                  <option value="lista">Salamanca – Lista</option>
+                  <option value="goya">Salamanca – Goya</option>
+                  <option value="almagro">Chamberí – Almagro</option>
+                  <option value="justicia">Centro – Justicia</option>
+                  <option value="jeronimos">Retiro – Jerónimos</option>
+                  <option value="elviso">Chamartín – El Viso</option>
+                </optgroup>
+                <!-- ALTA -->
+                <optgroup label="Alta">
+                  <option value="riosrosas">Chamberí – Ríos Rosas</option>
+                  <option value="trafalgar">Chamberí – Trafalgar</option>
+                  <option value="ibiza">Retiro – Ibiza</option>
+                  <option value="arguelles">Moncloa – Argüelles</option>
+                  <option value="aravaca">Moncloa – Aravaca</option>
+                  <option value="hispanoamerica">Chamartín – Hispanoamérica</option>
+                  <option value="mirasierra">Fuencarral – Mirasierra</option>
+                  <option value="sanchinarro">Hortaleza – Sanchinarro</option>
+                </optgroup>
+                <!-- MEDIA -->
+                <optgroup label="Media">
+                  <option value="cuatrocaminos">Tetuán – Cuatro Caminos</option>
+                  <option value="legazpi">Arganzuela – Legazpi</option>
+                  <option value="moratalaz">Moratalaz</option>
+                  <option value="ciudadlineal">Ciudad Lineal</option>
+                  <option value="hortaleza">Hortaleza</option>
+                  <option value="fuencarral">Fuencarral</option>
+                  <option value="latina">Latina</option>
+                  <option value="carabanchel">Carabanchel (mejor)</option>
+                </optgroup>
+                <!-- VALUE -->
+                <optgroup label="Value">
+                  <option value="usera">Usera</option>
+                  <option value="villaverde">Villaverde</option>
+                  <option value="pvallecas">Puente de Vallecas</option>
+                  <option value="vvallecas">Villa de Vallecas</option>
+                  <option value="vicalvaro">Vicálvaro</option>
+                </optgroup>
+              </select>
+            </label>
+
+            <label class="field" title="Tipo de inmueble">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M3 21V9l9-6 9 6v12H3Z" stroke="currentColor" stroke-width="1.6"/></svg>
+              <select name="tipo" id="tipo" required>
+                <option value="">Tipo</option>
+                <option value="piso">Piso</option>
+                <option value="chalet">Chalet</option>
+              </select>
+            </label>
+
+            <!-- m², habitaciones, baños -->
+            <label class="field" title="Metros útiles">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 20h16M4 4h16M4 12h16" stroke="currentColor" stroke-width="1.6"/></svg>
+              <input type="number" inputmode="decimal" name="m2" placeholder="Metros útiles" min="10" step="1" required>
+            </label>
+
+            <label class="field chalet-only" title="Metros de parcela" style="display:none">
+              <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="6" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.6"/></svg>
+              <input type="number" inputmode="decimal" name="parcela" placeholder="Parcela (m²)" min="0" step="1">
+            </label>
+
+            <label class="field" title="Dormitorios">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 10h16M6 10v8m12-8v8M8 18h8" stroke="currentColor" stroke-width="1.6"/></svg>
+              <input type="number" name="hab" placeholder="Dormitorios" min="0" step="1" required>
+            </label>
+
+            <label class="field" title="Baños">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M7 10h10a2 2 0 0 1 2 2v6H5v-6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/></svg>
+              <input type="number" name="banos" placeholder="Baños" min="1" step="1" required>
+            </label>
+
+            <!-- Planta / ascensor / exterior -->
+            <label class="field" title="Planta">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6 20V4h12v16M6 12h12" stroke="currentColor" stroke-width="1.6"/></svg>
+              <select name="planta">
+                <option value="ref">Planta</option>
+                <option value="bajo">Bajo</option>
+                <option value="1">1ª</option>
+                <option value="2-5">2ª–5ª</option>
+                <option value="6+">6ª+</option>
+                <option value="atico">Ático</option>
+              </select>
+            </label>
+
+            <label class="field" title="Ascensor">
+              <svg viewBox="0 0 24 24" fill="none"><rect x="5" y="3" width="14" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M10 7h4M10 12h4M10 17h4" stroke="currentColor" stroke-width="1.6"/></svg>
+              <select name="ascensor">
+                <option value="si">Ascensor: Sí</option>
+                <option value="no">Ascensor: No</option>
+              </select>
+            </label>
+
+            <label class="field" title="Exterior/Interior">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 4h16v16H4z" stroke="currentColor" stroke-width="1.6"/><path d="M4 10h16" stroke="currentColor" stroke-width="1.6"/></svg>
+              <select name="exterior">
+                <option value="si">Exterior</option>
+                <option value="no">Interior</option>
+              </select>
+            </label>
+
+            <label class="field" title="Orientación">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18" stroke="currentColor" stroke-width="1.6"/></svg>
+              <select name="orient">
+                <option value="none">Orientación</option>
+                <option value="sur">Sur / SO / SE</option>
+                <option value="norte">Norte</option>
+                <option value="otra">Este / Oeste</option>
+              </select>
+            </label>
+
+            <!-- Estado / terraza -->
+            <label class="field" title="Estado">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 4h16v6H4zM4 14h10v6H4z" stroke="currentColor" stroke-width="1.6"/></svg>
+              <select name="estado">
+                <option value="buen">Buen estado</option>
+                <option value="reformado">Reformado < 5 años</option>
+                <option value="obra">Obra nueva</option>
+                <option value="reformar">A reformar</option>
+              </select>
+            </label>
+
+            <label class="field" title="Terraza (m²)">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 8h16v10H4zM7 8V6h10v2" stroke="currentColor" stroke-width="1.6"/></svg>
+              <input type="number" name="terraza" placeholder="Terraza (m²)" min="0" step="1">
+            </label>
+
+            <!-- Garaje / trastero / piscina -->
+            <label class="field" title="Garaje">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M3 20V8l9-5 9 5v12H3Z" stroke="currentColor" stroke-width="1.6"/><path d="M7 20v-5h10v5" stroke="currentColor" stroke-width="1.6"/></svg>
+              <select name="garaje">
+                <option value="0">Garaje: 0</option>
+                <option value="1">Garaje: 1</option>
+                <option value="2">Garaje: 2</option>
+              </select>
+            </label>
+
+            <label class="field" title="Trastero">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16v10H4zM8 7V5h8v2" stroke="currentColor" stroke-width="1.6"/></svg>
+              <select name="trastero">
+                <option value="no">Trastero: No</option>
+                <option value="si">Trastero: Sí</option>
+              </select>
+            </label>
+
+            <label class="field" title="Piscina">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M3 16c2 0 2-2 4-2s2 2 4 2 2-2 4-2 2 2 4 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <select name="piscina">
+                <option value="no">Piscina: No</option>
+                <option value="com">Piscina comunitaria</option>
+                <option value="priv">Piscina privada</option>
+              </select>
+            </label>
+
+            <label class="field chalet-only" title="Tipo de chalet" style="display:none">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 11 12 5l8 6v8H4z" stroke="currentColor" stroke-width="1.6"/></svg>
+              <select name="tipoChalet">
+                <option value="adosado">Adosado</option>
+                <option value="pareado">Pareado</option>
+                <option value="indep">Independiente</option>
+              </select>
+            </label>
+
+            <!-- Entorno -->
+            <label class="field" title="Minutos al metro">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+              <input type="number" name="metro" placeholder="Minutos al metro" min="0" step="1">
+            </label>
+
+            <label class="field" title="Gastos comunidad">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16v10H4z" stroke="currentColor" stroke-width="1.6"/><path d="M8 11h8M8 14h8" stroke="currentColor" stroke-width="1.6"/></svg>
+              <input type="number" name="comunidad" placeholder="Comunidad €/mes" min="0" step="1">
+            </label>
+
+            <label class="field" title="Ruido / Calle">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M3 12h18M6 7v10m12-10v10" stroke="currentColor" stroke-width="1.6"/></svg>
+              <select name="ruido">
+                <option value="normal">Calle: normal</option>
+                <option value="tranquila">Muy tranquila</option>
+                <option value="ruidosa">Muy transitada/ruidosa</option>
+              </select>
+            </label>
+
+            <label class="field" title="Vistas">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M3 12s4-6 9-6 9 6 9 6-4 6-9 6-9-6-9-6Z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/></svg>
+              <select name="vistas">
+                <option value="normal">Vistas normales</option>
+                <option value="parque">Despejadas / a parque</option>
+                <option value="oscuro">Patio oscuro</option>
+              </select>
+            </label>
+
+            <label class="field" title="Eficiencia energética">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M6 18V6h12" stroke="currentColor" stroke-width="1.6"/></svg>
+              <select name="eficiencia">
+                <option value="no">Eficiencia: No consta</option>
+                <option value="A">A/B</option>
+                <option value="C">C/D</option>
+                <option value="E">E/F/G</option>
+              </select>
+            </label>
+
+            <div style="grid-column:1 / -1;display:flex;gap:10px;justify-content:flex-end;margin-top:6px">
+              <button type="reset" id="btn-clear" class="btn btn-outline">Limpiar</button>
+              <button type="submit" class="btn btn-primary">Calcular valoración</button>
+            </div>
+
+            <div id="err" class="help" style="grid-column:1 / -1">Revisa los campos obligatorios.</div>
+          </form>
+
+          <p class="small muted" style="margin-top:10px">* La valoración es orientativa y no sustituye una visita ni un estudio de comparables. Ajusta según reforma/estado real del edificio.</p>
+        </div>
+
+        <!-- ===== Resultados ===== -->
+        <aside class="result" aria-live="polite">
+          <div class="card">
+            <div class="pill ok">Estimación</div>
+            <div class="price" id="price">—</div>
+            <div class="range" id="range"></div>
+            <div class="muted small" id="subtitle" style="margin-top:6px">Introduce los datos y pulsa “Calcular valoración”.</div>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <div class="pill">Desglose</div>
+            <div class="breakdown" id="breakdown">
+              <div class="muted small">Verás aquí cómo afectan los factores (m², planta, estado, garaje, etc.).</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { loadPartials } from "./js/partials-loader.js";
+  import { initAuthUI } from "./js/auth-state.js";
+    await loadPartials();
+  initAuthUI();
+
+  // Año + offcanvas
+  document.getElementById('y').textContent = new Date().getFullYear();
+  document.querySelectorAll('.offcanvas a').forEach(a => a.addEventListener('click', () => {
+    document.querySelector('.offcanvas').classList.remove('open');
+  }));
+
+  // Mostrar/ocultar campos de chalet
+  const tipoSel = document.getElementById('tipo');
+  const chaletOnly = document.querySelectorAll('.chalet-only');
+  function toggleChalet(){
+    const isChalet = (tipoSel.value === 'chalet');
+    chaletOnly.forEach(el => el.style.display = isChalet ? '' : 'none');
+  }
+  tipoSel.addEventListener('change', toggleChalet);
+  toggleChalet(); // al cargar
+
+  // ===== Datos base por barrio/banda =====
+  // banda: prime/alta/media/value ; inM30: true/false (aprox)
+  const barrios = {
+    // PRIME
+    recoletos:{banda:'prime',inM30:true}, castellana:{banda:'prime',inM30:true},
+    lista:{banda:'prime',inM30:true}, goya:{banda:'prime',inM30:true},
+    almagro:{banda:'prime',inM30:true}, justicia:{banda:'prime',inM30:true},
+    jeronimos:{banda:'prime',inM30:true}, elviso:{banda:'prime',inM30:true},
+    // ALTA
+    riosrosas:{banda:'alta',inM30:true}, trafalgar:{banda:'alta',inM30:true},
+    ibiza:{banda:'alta',inM30:true}, arguelles:{banda:'alta',inM30:true},
+    aravaca:{banda:'alta',inM30:false}, hispanoamerica:{banda:'alta',inM30:true},
+    mirasierra:{banda:'alta',inM30:false}, sanchinarro:{banda:'alta',inM30:false},
+    // MEDIA
+    cuatrocaminos:{banda:'media',inM30:true}, legazpi:{banda:'media',inM30:true},
+    moratalaz:{banda:'media',inM30:false}, ciudadlineal:{banda:'media',inM30:false},
+    hortaleza:{banda:'media',inM30:false}, fuencarral:{banda:'media',inM30:false},
+    latina:{banda:'media',inM30:false}, carabanchel:{banda:'media',inM30:false},
+    // VALUE
+    usera:{banda:'value',inM30:false}, villaverde:{banda:'value',inM30:false},
+    pvallecas:{banda:'value',inM30:false}, vvallecas:{banda:'value',inM30:false},
+    vicalvaro:{banda:'value',inM30:false},
+  };
+
+  const baseM2 = {
+    piso : {prime:7400, alta:6000, media:4200, value:3200},
+    chalet: {prime:6200, alta:5000, media:3600, value:2800},
+  };
+  const parcelaM2 = {prime:600, alta:400, media:250, value:150}; // €/m² parcela
+  const garagePrice = (inM30)=> inM30 ? 35000 : 18000;
+
+  const eurosFmt = n => new Intl.NumberFormat('es-ES',{maximumFractionDigits:0})
+                        .format(Math.round(n)) + ' €';
+
+  // ===== Cálculo =====
+  const form = document.getElementById('val-form');
+  const outPrice = document.getElementById('price');
+  const outRange = document.getElementById('range');
+  const outSub   = document.getElementById('subtitle');
+  const outBD    = document.getElementById('breakdown');
+  const errBox   = document.getElementById('err');
+
+  form.addEventListener('reset', () => {
+  // deja que el navegador resetee los campos primero
+  setTimeout(() => {
+    // oculta errores y quita marcas rojas
+    errBox.style.display = 'none';
+    form.querySelectorAll('.field').forEach(f => f.classList.remove('is-invalid'));
+    form.querySelectorAll('[aria-invalid="true"]').forEach(el => el.removeAttribute('aria-invalid'));
+
+    // vuelve a ocultar los campos "solo chalet"
+    toggleChalet();
+
+    // resetea el panel de resultados
+    outPrice.textContent = '—';
+    outRange.textContent = '';
+    outSub.textContent = 'Introduce los datos y pulsa “Calcular valoración”.';
+    outBD.innerHTML = '<div class="muted small">Verás aquí cómo afectan los factores (m², planta, estado, garaje, etc.).</div>';
+  }, 0);
+});
+
+
+  form.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    errBox.style.display = 'none';
+    form.querySelectorAll('.field').forEach(f => f.classList.remove('is-invalid'));
+
+    const f = Object.fromEntries(new FormData(form).entries());
+
+    // --- validación de obligatorios y reglas mínimas ---
+const rules = {
+  barrio: v => !!v,
+  tipo:   v => !!v,
+  m2:     v => Number(v) >= 10,   // respeta tu min="10"
+  hab:    v => String(v).trim() !== '',
+  banos:  v => Number(v) >= 1
+};
+
+const invalid = [];
+Object.entries(rules).forEach(([name, test])=>{
+  const el = form.querySelector(`[name="${name}"]`);
+  const ok = test(f[name]);
+  if(!ok && el){
+    el.closest('.field')?.classList.add('is-invalid');
+    el.setAttribute('aria-invalid','true');
+    invalid.push(el);
+  }
+});
+
+if(invalid.length){
+  errBox.style.display = 'block';
+  invalid[0].focus({preventScroll:true});
+  invalid[0].scrollIntoView({behavior:'smooth', block:'center'});
+  return;
+}
+
+    const barr = barrios[f.barrio];
+    const banda = barr ? barr.banda : 'media';
+    const inM30 = barr ? !!barr.inM30 : false;
+    const tipo = f.tipo;
+
+    const m2 = Math.max(0, Number(f.m2||0));
+    const hab = Number(f.hab||0);
+    const ban = Number(f.banos||0);
+    const planta = f.planta||'ref';
+    const asc = (f.ascensor||'si')==='si';
+    const exterior = (f.exterior||'si')==='si';
+    const orient = f.orient||'none';
+    const estado = f.estado||'buen';
+    const terraza = Math.max(0, Number(f.terraza||0));
+    const garajes = Number(f.garaje||0);
+    const trastero = (f.trastero||'no')==='si';
+    const piscina = f.piscina||'no';
+    const tipoChalet = f.tipoChalet||'adosado';
+    const parcela = Math.max(0, Number(f.parcela||0));
+    const metro = Number(f.metro||0);
+    const comunidad = Number(f.comunidad||0);
+    const ruido = f.ruido||'normal';
+    const vistas = f.vistas||'normal';
+    const efic = f.eficiencia||'no';
+
+    // 1) base
+    let base = m2 * (baseM2[tipo][banda] || 4000);
+    const notes = [];
+    notes.push({k:'Base', v: eurosFmt(base), desc:`${m2} m² × ${baseM2[tipo][banda]} €/m² (${banda})`});
+
+    // 2) multiplicadores %
+    let mult = 1;
+    const pushPct = (label, pct)=>{
+      mult *= (1+pct);
+      notes.push({k:label, v: (pct>=0?'+':'') + Math.round(pct*100)+'%', desc:''});
+    };
+
+    // tamaño
+    if(m2 < 50) pushPct('Tamaño <50 m²', +0.10);
+    else if(m2 <= 90) {/*0*/}
+    else if(m2 <= 140) pushPct('Tamaño 90–140', -0.05);
+    else pushPct('Tamaño >140', -0.10);
+
+    // habitaciones
+    if(hab===1) pushPct('1 dormitorio', -0.05);
+    else if(hab===3) pushPct('3 dormitorios', +0.03);
+    else if(hab>=4) pushPct('4+ dormitorios', +0.06);
+
+    // baños
+    if(ban>=2){
+      const extra = Math.min(0.08, 0.04 + (ban-2)*0.02);
+      pushPct(`${ban} baños`, extra);
+    }
+
+    // planta / ascensor / ático
+    if(planta==='bajo') pushPct('Bajo', -0.07);
+    else if(planta==='1') pushPct('1ª', -0.03);
+    else if(planta==='6+') pushPct('Planta alta', +0.05);
+    else if(planta==='atico') pushPct('Ático', +0.12);
+    if(!asc && planta!=='bajo'){ pushPct('Sin ascensor', inM30 ? -0.08 : -0.05); }
+
+    // exterior / orientación
+    if(exterior) pushPct('Exterior', +0.03); else pushPct('Interior', -0.02);
+    if(orient==='sur') pushPct('Orientación sur', +0.02);
+    if(orient==='norte') pushPct('Orientación norte', -0.02);
+
+    // estado
+    if(estado==='obra') pushPct('Obra nueva', +0.20);
+    else if(estado==='reformado') pushPct('Reforma reciente', +0.10);
+
+    // terraza
+    if(terraza>0){
+      if(terraza>=10){
+        const extraTerraza = Math.min(0.12, 0.06 + Math.floor((terraza-10)/5)*0.01);
+        pushPct(`Terraza ${terraza} m²`, extraTerraza);
+      }else{
+        pushPct('Balcón/terraza pequeña', +0.02);
+      }
+    }
+
+    // vistas / ruido
+    if(vistas==='parque') pushPct('Vistas despejadas', +0.07);
+    if(vistas==='oscuro') pushPct('Patio oscuro', -0.02);
+    if(ruido==='tranquila') pushPct('Calle tranquila', +0.02);
+    if(ruido==='ruidosa') pushPct('Calle muy transitada', -0.06);
+
+    // transporte / comunidad
+    if(metro>0 && metro<=5) pushPct('Cerca del metro', +0.02);
+    if(metro>=12) pushPct('Lejos del metro', -0.02);
+    if(comunidad>=250) pushPct('Comunidad alta', -0.03);
+
+    // eficiencia
+    if(efic==='A') pushPct('Eficiencia A/B', +0.04);
+    if(efic==='E') pushPct('Eficiencia baja (E/F/G)', -0.03);
+
+    // chalet specifics
+    if(tipo==='chalet'){
+      if(tipoChalet==='pareado') pushPct('Chalet pareado', +0.05);
+      if(tipoChalet==='indep') pushPct('Chalet independiente', +0.10);
+    }
+
+    // cap de multiplicadores
+    const pctTotal = mult - 1;
+    const pctCapped = Math.max(-0.40, Math.min(0.60, pctTotal));
+    if(pctCapped !== pctTotal){
+      mult = 1 + pctCapped;
+      notes.push({k:'Tope de ajustes', v: (pctCapped>=0?'+':'')+Math.round(pctCapped*100)+'%', desc:'Aplicado para evitar extremos'});
+    }
+
+    // 3) sumas/restas en €
+    let eurosDelta = 0;
+
+    // reforma integral
+    if(estado==='reformar'){
+      const reformaCoste = 900 * m2;
+      eurosDelta -= reformaCoste;
+      notes.push({k:'Reforma integral', v:'−'+eurosFmt(reformaCoste), desc:'~900 €/m²'});
+    }
+
+    // garajes
+    if(garajes>=1){
+      const g1 = garagePrice(inM30);
+      eurosDelta += g1;
+      notes.push({k:'Garaje 1ª plaza', v:'+'+eurosFmt(g1), desc: inM30?'Dentro M-30':'Fuera M-30'});
+    }
+    if(garajes>=2){
+      const g2 = Math.round(garagePrice(inM30)*0.8);
+      eurosDelta += g2;
+      notes.push({k:'Garaje 2ª plaza', v:'+'+eurosFmt(g2), desc:'Utilidad marginal'});
+    }
+
+    // trastero
+    if(trastero){ eurosDelta += 6000; notes.push({k:'Trastero', v:'+6.000 €', desc:''}); }
+
+    // piscina
+    if(piscina==='com'){ pushPct('Piscina comunitaria', +0.03); }
+    if(piscina==='priv'){ eurosDelta += 30000; notes.push({k:'Piscina privada', v:'+30.000 €', desc:''}); }
+
+    // parcela (chalets)
+    if(tipo==='chalet' && parcela>0){
+      const pricePerM2Parcela = parcelaM2[banda] || 250;
+      const p1 = Math.min(parcela,300) * pricePerM2Parcela;
+      const p2 = Math.max(parcela-300,0) * Math.round(pricePerM2Parcela*0.5);
+      const parcelaSum = p1 + p2;
+      eurosDelta += parcelaSum;
+      notes.push({k:'Parcela', v:'+'+eurosFmt(parcelaSum), desc:`${Math.min(parcela,300)} m² × ${pricePerM2Parcela} + resto al 50%`});
+    }
+
+    // 4) resultado
+    const valor = base * mult + eurosDelta;
+    const min = valor * 0.94;
+    const max = valor * 1.06;
+
+    outPrice.textContent = eurosFmt(valor);
+    outRange.textContent = `Rango: ${eurosFmt(min)} – ${eurosFmt(max)}`;
+    outSub.textContent = `Banda: ${banda.toUpperCase()} · Tipo: ${tipo.toUpperCase()} · Ajustes ${(mult-1>=0?'+':'')}${Math.round((mult-1)*100)}% · Extras ${eurosFmt(eurosDelta)}`;
+
+    // breakdown
+    outBD.innerHTML = '';
+    notes.forEach(n=>{
+      const row = document.createElement('div');
+      row.className='row';
+      row.innerHTML = `<div><strong>${n.k}</strong> <span class="note">${n.desc||''}</span></div><div>${n.v}</div>`;
+      outBD.appendChild(row);
+    });
+
+    // aviso densidad (opcional)
+    const dens = m2 / Math.max(1,hab);
+    if(dens < 25){
+      const warn = document.createElement('div');
+      warn.className='card warn small';
+      warn.style.marginTop='10px';
+      warn.textContent = 'Aviso: m² por dormitorio inusualmente bajos. Revisa la distribución; puede afectar al valor real.';
+      outBD.appendChild(warn);
+    }
+  });
+
+  // Limpia el estado inválido cuando el usuario corrige
+form.addEventListener('input', (e)=>{
+  const wrap = e.target.closest('.field');
+  if(wrap){
+    wrap.classList.remove('is-invalid');
+    e.target.removeAttribute('aria-invalid');
+    // opcional: oculta el aviso general si ya cumplen todos
+    const req = ['barrio','tipo','m2','hab','banos'];
+    const allOk = req.every(name=>{
+      const el = form.querySelector(`[name="${name}"]`);
+      if(!el) return true;
+      if(name==='m2')    return Number(el.value) >= 10;
+      if(name==='banos') return Number(el.value) >= 1;
+      return String(el.value).trim() !== '';
+    });
+    if(allOk) errBox.style.display = 'none';
+  }
+});
+
+</script>
+<script type="module" src="js/newsletter.js"></script>
+</body>
+</html>

@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Nidavia Real Estate · Home</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+  .hero{
+    background:
+      linear-gradient(90deg, rgba(19,41,61,.92) 0%, rgba(14,28,42,.88) 60%, rgba(14,28,42,.7) 100%),
+      url("https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=1800&auto=format&fit=crop") center/cover no-repeat;
+  }
+  .hero .search{
+    margin-top:8px;
+    background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.18);
+    padding:14px;
+    border-radius:var(--radius-xl);
+    backdrop-filter: blur(6px);
+    box-shadow: var(--shadow-soft);
+  }
+  @media (max-width:980px){
+    .hero .search .search-grid{ grid-template-columns:1fr 1fr; }
+    .hero .search .search-grid .btn{ grid-column:1 / -1; }
+  }
+  .section.dark{ background:var(--bg-base); color:#E9EDF3; }
+  .features{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px }
+  @media (max-width:980px){ .features{ grid-template-columns:repeat(2,1fr) } }
+  @media (max-width:560px){ .features{ grid-template-columns:1fr } }
+  .feature{ position:relative; background:transparent; border:1px solid var(--border);
+    border-radius: var(--radius-lg); padding:22px; overflow:hidden; }
+  .feature::before{
+    content:""; position:absolute; inset:8px; border-radius:14px;
+    background: var(--feature-bg, #F7F3EE);
+    z-index:0;
+  }
+  .feature > *{ position:relative; z-index:1 }
+  .feature.salvia  { --feature-bg:#E3EEE9; }
+  .feature.champan { --feature-bg:#F6EDDF; }
+  .feature.marino  { --feature-bg:#EAF0F5; }
+  .feature.marfil  { --feature-bg:#FBF8F3; }
+  .icon{
+    width:56px; height:56px; border-radius:14px; display:grid; place-items:center;
+    background:linear-gradient(135deg,#0E1C2A,#13293D); color:#fff;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .icon svg{ width:28px; height:28px }
+  .feature h4{ margin:.8rem 0 .4rem }
+  .feature p{ margin:0; color:var(--text-secondary) }
+  .cta{
+    background:var(--brand-primary); color:#fff; border-radius:var(--radius-xl);
+    padding:26px; display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    border:1px solid rgba(255,255,255,.08);
+  }
+  .cta .btn-outline{ background:#fff; color:var(--brand-primary); border-color:#fff }
+  .cta .btn-outline:hover{ filter:brightness(.95) }
+  @media (max-width:760px){ .cta{ flex-direction:column; align-items:flex-start } }
+  .section-asesoria{ padding-bottom:32px; }
+  .section-cta{ padding-top:32px; padding-bottom:32px; }
+  </style>
+</head>
+<body>
+<header id="header-placeholder" class="header loading">
+  <div class="container nav">
+    <div class="brand-lockup" style="opacity:.5;">Cargando...</div>
+  </div>
+</header>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero">
+    <div class="container hero-inner">
+      <span class="kicker">Tu nuevo hogar te espera</span>
+      <h1>Encuentra propiedades selectas con asesoría de alto nivel</h1>
+      <p>Especialistas en zonas prime y oportunidades con alta rentabilidad. Visitas privadas, tasación precisa y acompañamiento 360°.</p>
+
+      <div class="search" role="search" aria-label="Buscador de propiedades">
+        <form id="search-form" class="search-grid" action="buscar.html" method="GET">
+          <label class="field" aria-label="Ubicación">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 22s7-5.686 7-12a7 7 0 1 0-14 0c0 6.314 7 12 7 12Z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/></svg>
+            <input type="text" name="u" placeholder="Ubicación, barrio o CP">
+          </label>
+          <label class="field" aria-label="Tipo">
+            <select name="tipo">
+              <option value="">Tipo</option>
+              <option value="piso">Piso</option>
+              <option value="chalet">Chalet</option>
+              <option value="atico">Ático</option>
+              <option value="duplex">Dúplex</option>
+            </select>
+          </label>
+          <label class="field" aria-label="Precio mínimo">
+            <select name="min">
+              <option value="">Precio mín.</option>
+              <option value="100000">100.000 €</option>
+              <option value="200000">200.000 €</option>
+              <option value="300000">300.000 €</option>
+              <option value="500000">500.000 €</option>
+            </select>
+          </label>
+          <label class="field" aria-label="Precio máximo">
+            <select name="max">
+              <option value="">Precio máx.</option>
+              <option value="300000">300.000 €</option>
+              <option value="500000">500.000 €</option>
+              <option value="800000">800.000 €</option>
+              <option value="1000000">1.000.000 €</option>
+            </select>
+          </label>
+          <button class="btn btn-primary" type="submit">Buscar</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== DESTACADOS ===== -->
+  <section class="section dark">
+    <div class="container">
+      <div class="head">
+        <h2>Propiedades destacadas</h2>
+        <a id="featured-toggle" class="ghost-link" href="#" style="color:#E9EDF3">Ver todo →</a>
+      </div>
+      <div id="featured-cards" class="cards"></div>
+    </div>
+  </section>
+
+  <!-- ===== ASESORÍA ===== -->
+  <section class="section section-asesoria">
+    <div class="container">
+      <div class="head"><h2>Asesoría a tu medida</h2></div>
+      <div class="features">
+        <div class="feature salvia">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12V6a2 2 0 0 1 2-2h6l10 10-6 6L3 12Z" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/></svg></div>
+          <h4>Tasación precisa</h4>
+          <p>Valoración real basada en datos, para comprar o vender con seguridad.</p>
+        </div>
+        <div class="feature champan">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M4 8h3l2-2h6l2 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="13" r="3.5" stroke="currentColor" stroke-width="1.6"/></svg></div>
+          <h4>Foto & vídeo premium</h4>
+          <p>Producción visual de alto nivel para destacar cada espacio.</p>
+        </div>
+        <div class="feature marino">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><path d="M8 12 5 9l3-3 4 4 2-2 5 5-3 3-4-4-2 2-2-2Z" stroke="currentColor" stroke-width="1.6"/><path d="M2 12 7 7m15 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          <h4>Negociación experta</h4>
+          <p>Maximizamos el valor y minimizamos tiempos de cierre.</p>
+        </div>
+        <div class="feature marfil">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none"><rect x="4" y="3" width="12" height="18" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 8h6M8 12h6M8 16h3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M16 15l1.5 1.5L22 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+          <h4>Contratos digitales</h4>
+          <p>Procesos claros y ágiles con firma electrónica segura.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
+  <section class="section section-cta">
+    <div class="container">
+      <div class="cta">
+        <div>
+          <h3 style="margin:.2rem 0 6px">¿Quieres vender o alquilar tu inmueble?</h3>
+          <p style="margin:0">Solicita una valoración gratuita y te asesoramos sin compromiso.</p>
+        </div>
+        <a class="btn btn-outline" href="valoracion.html">Solicitar valoración</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER dinámico -->
+
+  <script type="module">
+    import { loadPartials } from "./js/partials-loader.js";
+    import { db } from "./js/firebase-config.js";
+    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { initAuthUI } from "./js/auth-state.js";
+    await loadPartials();
+  initAuthUI();
+
+    const ICON_BED = '<svg viewBox="0 0 24 24"><path d="M4 10h16M6 10v8m12-8v8M8 18h8" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
+    const ICON_BATH = '<svg viewBox="0 0 24 24"><path d="M7 10h10a2 2 0 0 1 2 2v6H5v-6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
+    const ICON_AREA = '<svg viewBox="0 0 24 24"><path d="M4 20h16M4 4h16M4 12h16" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
+    const ICON_HOME = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M3 21V9l9-6 9 6v12H3Z" stroke="currentColor" stroke-width="1.5"/></svg>';
+
+    const euros = n => new Intl.NumberFormat('es-ES').format(n) + ' €';
+    const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+
+    const container = document.getElementById('featured-cards');
+    const toggle = document.getElementById('featured-toggle');
+    let FEATURED_ALL = [];
+    let expanded = false;
+
+    const priceText = p => p.operation === 'alquiler' ? euros(p.price) + ' /mes' : euros(p.price);
+
+    const cardTemplate = p => {
+      const imgs = (p.gallery && p.gallery.length ? p.gallery : [p.image])
+        .map((src,i)=>`<img loading="lazy" src="${esc(src)}" alt="${esc(p.title)} – foto ${i+1}">`)
+        .join('');
+      const ARROW_L='<svg viewBox="0 0 24 24" fill="none"><path d="M15 5 8 12l7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      const ARROW_R='<svg viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      return `
+      <article class="card">
+        <div class="card-media">
+          <div class="media-carousel" data-index="0">
+            <div class="media-track">${imgs}</div>
+            ${(p.gallery && p.gallery.length>1)?`
+              <button class="media-nav media-prev" aria-label="Anterior">${ARROW_L}</button>
+              <button class="media-nav media-next" aria-label="Siguiente">${ARROW_R}</button>`:''}
+          </div>
+          <span class="badge">${priceText(p)}</span>
+          ${p.tag?`<span class="ribbon">${esc(cap(p.tag))}</span>`:''}
+        </div>
+        <div class="card-body">
+          <div class="card-title"><h3>${esc(p.title)}</h3><span class="chip">${ICON_HOME} ${esc(cap(p.operation))}</span></div>
+          <div class="meta">
+            ${p.bedrooms?`<span>${ICON_BED} ${p.bedrooms} hab</span>`:''}
+            ${p.bathrooms?`<span>${ICON_BATH} ${p.bathrooms} baños</span>`:''}
+            ${p.area_m2?`<span>${ICON_AREA} ${p.area_m2} m²</span>`:''}
+          </div>
+          <div class="location">${esc(p.address)}</div>
+          <div class="card-actions">
+            <a class="ghost-link" href="detalle.html?id=${p.id}">Ver detalle</a>
+            <a class="btn btn-outline" href="solicitar-visita.html?property=${encodeURIComponent(p.title)}">Solicitar visita</a>
+          </div>
+        </div>
+      </article>`;
+    };
+
+    const initCarousels = () => {
+      document.querySelectorAll('#featured-cards .media-carousel').forEach(carousel=>{
+        const track = carousel.querySelector('.media-track');
+        const slides = track.children;
+        let idx=0;
+        const update=()=>track.style.transform=`translateX(-${idx*100}%)`;
+        carousel.querySelector('.media-prev')?.addEventListener('click',e=>{
+          e.preventDefault(); idx=(idx-1+slides.length)%slides.length; update();
+        });
+        carousel.querySelector('.media-next')?.addEventListener('click',e=>{
+          e.preventDefault(); idx=(idx+1)%slides.length; update();
+        });
+        update();
+      });
+    };
+
+    const renderFeatured = (limit=3)=>{
+      const items=expanded?FEATURED_ALL:FEATURED_ALL.slice(0,limit);
+      if(!items.length){
+        container.innerHTML='<p style="color:#fff;opacity:.85">Sin propiedades destacadas.</p>';
+        toggle.style.display='none';
+        return;
+      }
+      container.innerHTML=items.map(cardTemplate).join('');
+      initCarousels();
+      toggle.style.display=FEATURED_ALL.length>limit?'':'none';
+      toggle.textContent=expanded?'Ver menos ↑':'Ver todo →';
+    };
+
+    toggle.addEventListener('click',e=>{
+      e.preventDefault();
+      expanded=!expanded;
+      renderFeatured();
+      if(!expanded) container.scrollIntoView({behavior:'smooth'});
+    });
+
+    async function loadFeatured(){
+      try{
+        const snapshot=await getDocs(collection(db,'properties'));
+        FEATURED_ALL=[];
+        snapshot.forEach(doc=>FEATURED_ALL.push({id:doc.id,...doc.data()}));
+        FEATURED_ALL=FEATURED_ALL.filter(p=>p.featured===true);
+        renderFeatured();
+        console.log(`✅ ${FEATURED_ALL.length} propiedades destacadas cargadas`);
+      }catch(e){
+        console.error('❌ Error al cargar propiedades destacadas:',e);
+        container.innerHTML='<p style="color:#fff;opacity:.85">No se pudieron cargar las propiedades.</p>';
+        toggle.style.display='none';
+      }
+    }
+
+    loadFeatured();
+  </script>
+
+  <script type="module" src="js/newsletter.js"></script>
+</body>
+</html>

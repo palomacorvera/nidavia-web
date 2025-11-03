@@ -1,0 +1,5 @@
+- Hacer la funcionalidad de favoritos para las personas que han iniciado sesión.
+
+- Añadir en el apartado de admin un apartado para subir viviendas a la base de datos que actualicen la web.
+
+- Hacer que el solicitar visita vaya con un calendario real y se bloqueen las fechas/horas ya reservadas.

@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Detalle de propiedad · Nidavia</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+
+/* Espaciado general y “volver” inteligente */
+main{ padding:16px 0 36px }
+.smart-back{ margin:18px 0 12px; display:flex }
+
+/* Galería (override del carrusel global para NO usar absolute aquí) */
+.media{
+  position:relative;
+  background:#dfe6ee;
+  border:1px solid var(--border);
+  border-radius:var(--radius-xl);
+  overflow:hidden;
+}
+.media .media-carousel{
+  position:relative;
+  aspect-ratio:16/9;
+  inset:auto;
+  overflow:hidden;
+}
+.media .media-track{
+  height:100%;
+  display:flex;
+  width:100%;
+  transition:transform .35s ease;
+  will-change:transform;
+}
+.media .media-track img{
+  flex:0 0 100%;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  user-select:none;
+}
+.media .media-nav{ width:42px; height:42px }      /* flechas un pelín mayores */
+.media .badge,
+.media .ribbon{ z-index:4 }                        /* por encima del carrusel */
+
+/* Layout principal */
+.grid{
+  display:grid;
+  grid-template-columns:1.6fr .9fr;
+  gap:22px;
+  margin-top:18px;
+}
+@media (max-width:980px){ .grid{ grid-template-columns:1fr } }
+
+/* Panel de contenido */
+.panel{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-soft);
+  padding:16px;
+}
+.title{ display:flex; gap:12px; align-items:flex-start }
+.title h1{ margin:.2rem 0; line-height:1.15; font-size:clamp(1.4rem,1vw + 1.2rem,2rem) }
+
+/* Meta + destacados */
+.panel .meta{
+  display:flex;
+  gap:16px;
+  flex-wrap:wrap;
+  color:var(--text-secondary);
+  margin:.4rem 0 .8rem;
+}
+.panel .meta span{ display:inline-flex; align-items:center; gap:.35rem }
+.highlights{ display:flex; gap:.45rem; flex-wrap:wrap; margin:.3rem 0 1rem }
+.pill{ background:#FBF8F3; border:1px solid var(--border); border-radius:999px; padding:.35rem .65rem; font-size:.9rem }
+
+/* Especificaciones */
+.specs{ display:grid; grid-template-columns:1fr 1fr; gap:10px }
+.spec{
+  display:flex;
+  justify-content:space-between;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:.6rem .8rem;
+  background:#fff;
+}
+@media (max-width:640px){ .specs{ grid-template-columns:1fr } }
+
+/* Sidebar */
+.sidebar .price{ font-size:1.6rem; font-weight:800 }
+.sidebar .box{ border:1px solid var(--border); border-radius:14px; padding:14px; background:#fff }
+.sidebar .box + .box{ margin-top:12px }
+
+
+  </style>
+</head>
+<body>
+<header id="header-placeholder" class="header loading">
+  <div class="container nav">
+    <div class="brand-lockup" style="opacity:.5;">Cargando...</div>
+  </div>
+</header>
+
+  <!-- ===== CONTENIDO DETALLE ===== -->
+  <main class="container">
+    
+<nav id="smart-back" class="smart-back" hidden>
+  <a id="smart-back-link" class="btn btn-outline" href="#">← Volver</a>
+</nav>
+
+    <div class="media">
+      <div class="media-carousel">
+        <div class="media-track" id="track"></div>
+        <button class="media-nav media-prev" id="prev" aria-label="Anterior">‹</button>
+        <button class="media-nav media-next" id="next" aria-label="Siguiente">›</button>
+      </div>
+      <span class="badge" id="badge-price"></span>
+      <span class="ribbon" id="ribbon-tag" style="display:none"></span>
+    </div>
+
+    <div class="grid">
+      <section class="panel">
+        <div class="title">
+          <h1 id="title">Propiedad</h1>
+          <span class="chip" id="chip-op">—</span>
+        </div>
+        <div class="meta" id="meta"></div>
+        <div id="address" style="color:var(--text-secondary)"></div>
+
+        <div class="highlights" id="highlights"></div>
+
+        <h3>Descripción</h3>
+        <p id="description" style="margin-top:.2rem"></p>
+
+        <h3 style="margin-top:14px">Especificaciones</h3>
+        <div class="specs" id="specs"></div>
+      </section>
+
+      <aside class="sidebar">
+        <div class="box">
+          <div class="price" id="side-price">—</div>
+          <div id="price-note" style="color:var(--text-secondary);margin-top:4px"></div>
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <div style="margin-top:10px;display:flex;gap:8px">
+  <a id="visit-btn" class="btn btn-outline" href="#">Solicitar visita</a>
+  <a id="cta-phone" class="btn btn-outline" href="#">Llamar</a>
+</div>
+
+          </div>
+        </div>
+
+        <div class="box">
+          <h4 style="margin:.2rem 0 .6rem">Gastos / Comunidad</h4>
+          <div id="financial"></div>
+        </div>
+
+        <div class="box">
+          <h4 style="margin:.2rem 0 .6rem">Agente</h4>
+          <div id="agent"></div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+ <script type="module">
+  import { loadPartials } from "./js/partials-loader.js";
+   import { getDocs, collection } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+    import { db } from "./js/firebase-config.js";
+    import { initAuthUI } from "./js/auth-state.js";
+  await loadPartials();
+  initAuthUI();
+    
+  // Año y offcanvas
+  document.getElementById('y').textContent = new Date().getFullYear();
+  document.querySelectorAll('.offcanvas a').forEach(a =>
+    a.addEventListener('click', () => document.querySelector('.offcanvas').classList.remove('open'))
+  );
+
+  // === Helpers ===
+  const euros = n => new Intl.NumberFormat('es-ES').format(n) + ' €';
+  const cap   = s => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
+  const esc   = s => String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  const qs    = new URLSearchParams(location.search);
+  const qSlug = qs.get('slug');
+  const qId   = qs.get('id');
+
+  // === Carga la propiedad desde Firestore ===
+  async function loadProperty() {
+    try {
+      const querySnapshot = await getDocs(collection(db, "properties"));
+      const all = [];
+      querySnapshot.forEach(doc => all.push({ id: doc.id, ...doc.data() }));
+
+      // Buscar por slug o id
+      const prop = all.find(p => (qSlug && p.slug === qSlug) || (qId && String(p.id) === String(qId)));
+      if (!prop) {
+        document.querySelector('main').innerHTML = `
+          <div class="panel"><h2>No hemos encontrado esta propiedad.</h2>
+          <p>Puede que el enlace haya cambiado o ya no esté disponible.</p>
+          <p><a class="btn btn-outline" href="index.html">← Volver al inicio</a></p></div>`;
+        return;
+      }
+      render(prop);
+    } catch (e) {
+      console.error("❌ Error al cargar la propiedad:", e);
+      document.querySelector('main').innerHTML = `
+        <div class="panel"><h2>Error cargando la propiedad</h2>
+        <p>Inténtalo de nuevo en unos segundos.</p></div>`;
+    }
+  }
+
+// ===== Trail de navegación en sessionStorage =====
+function getTrail(){
+  try { return JSON.parse(sessionStorage.getItem('trail') || '[]'); }
+  catch { return []; }
+}
+function saveTrail(t){
+  sessionStorage.setItem('trail', JSON.stringify(t.slice(-30)));
+}
+function pushHere(){
+  const here = (location.pathname.split('/').pop() || 'index.html') + location.search;
+  const t = getTrail();
+  if (t[t.length - 1] !== here) {
+    t.push(here);
+    saveTrail(t);
+  }
+}
+// Llama SIEMPRE al entrar en la página:
+pushHere();
+
+(function setupSmartBack(){
+  const wrap = document.getElementById('smart-back');
+  const link = document.getElementById('smart-back-link');
+  if (!wrap || !link) return;
+
+  const allowedBases = new Set([
+    'index.html','viviendas.html','alquiler.html','obranueva.html','buscar.html'
+  ]);
+
+  const t = getTrail();
+  let target = null;
+
+  const hereBase = (location.pathname.split('/').pop() || 'index.html');
+  const here = hereBase + location.search;
+
+  // 🔸 recorrer desde el final hacia atrás
+  // ignorando:
+  // - la propia página actual
+  // - cualquier solicitar-visita.html
+  // - duplicados consecutivos de detalle.html
+  let skipDetalle = true;
+  for (let i = t.length - 1; i >= 0; i--) {
+    const url = t[i];
+    const base = url.split('?')[0];
+
+    if (url === here) continue;                     // propia página
+    if (base === 'solicitar-visita.html') continue; // ignorar visitas
+    if (base === 'detalle.html' && skipDetalle) {   // saltar el último detalle (el actual)
+      skipDetalle = false;
+      continue;
+    }
+
+    if (allowedBases.has(base)) { target = url; break; }
+  }
+
+  wrap.hidden = false;
+
+  if (target) link.href = target;
+  else {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (history.length > 1) history.back();
+      else location.href = 'index.html';
+    });
+  }
+})();
+
+
+  // === Renderiza la vista ===
+  function render(p){
+    // Título y chip
+    document.getElementById('title').textContent = p.title || 'Propiedad';
+    document.getElementById('chip-op').textContent = cap(p.operation || '—');
+
+    // Precio y etiqueta
+    const priceText = p.operation === 'alquiler' ? euros(p.price) + ' /mes' : euros(p.price);
+    document.getElementById('badge-price').textContent = priceText;
+    document.getElementById('side-price').textContent  = priceText;
+
+    if (p.tag){
+      const tag = document.getElementById('ribbon-tag');
+      tag.textContent = cap(p.tag);
+      tag.style.display = '';
+    }
+
+    // Meta, dirección, descripción, highlights
+    document.getElementById('meta').innerHTML = `
+      <span>🛏️ ${p.bedrooms ?? '-'} hab</span>
+      <span>🛁 ${p.bathrooms ?? '-'} baños</span>
+      <span>📐 ${p.area_m2 ?? '-'} m²</span>`;
+    document.getElementById('address').textContent = p.address || '';
+    document.getElementById('description').textContent = p.description || '';
+    document.getElementById('highlights').innerHTML =
+      (p.highlights || []).map(h => `<span class="pill">${esc(h)}</span>`).join('');
+
+    // Especificaciones
+    const S = p.specs || {}, A = p.areas || {};
+    const specs = [
+      ['Año', S.built_year ?? '—'],
+      ['Planta', S.floor ?? '—'],
+      ['Orientación', S.orientation ?? '—'],
+      ['Calefacción', S.heating ?? '—'],
+      ['A/C', S.ac === true ? 'Sí' : (S.ac === false ? 'No' : '—')],
+      ['Aparcamiento', S.parking ?? '—'],
+      ['Trastero', S.storage === true ? 'Sí' : (S.storage === false ? 'No' : '—')],
+      ['Ascensor', S.elevator === true ? 'Sí' : (S.elevator === false ? 'No' : '—')],
+      ['Energía', S.energy_rating ?? '—'],
+      ['Terraza', A.terrace_m2 ? A.terrace_m2 + ' m²' : '—'],
+      ['Balcón', A.balcony_m2 ? A.balcony_m2 + ' m²' : '—'],
+      ['Parcela', A.plot_m2 ? A.plot_m2 + ' m²' : '—'],
+    ];
+    document.getElementById('specs').innerHTML =
+      specs.map(([k,v]) => `<div class="spec"><span>${k}</span><strong>${esc(v)}</strong></div>`).join('');
+
+    // Sidebar: gastos y agente
+    const F = p.financial || {};
+    document.getElementById('financial').innerHTML = `
+      <div class="spec"><span>Comunidad</span><strong>${F.hoa_fee ? euros(F.hoa_fee) + '/mes' : '—'}</strong></div>
+      <div class="spec" style="margin-top:8px"><span>IBI anual</span><strong>${F.ibi_yearly ? euros(F.ibi_yearly) + '/año' : '—'}</strong></div>`;
+    document.getElementById('price-note').textContent = F.price_note || '';
+
+    const C = p.contact || {};
+    document.getElementById('agent').innerHTML = `
+      <div><strong>${esc(C.agent || 'Equipo Nidavia')}</strong></div>
+      <div style="color:var(--text-secondary)">${esc(C.phone || '')}</div>`;
+    document.getElementById('cta-phone').href = C.phone ? 'tel:' + C.phone.replace(/\s+/g,'') : '#';
+
+    // Galería
+    const pics = (p.gallery && p.gallery.length ? p.gallery : [p.image]).filter(Boolean);
+    const track = document.getElementById('track');
+    track.innerHTML = pics.map((src,i)=>`<img src="${esc(src)}" alt="${esc(p.title)} – foto ${i+1}">`).join('');
+    initCarousel(pics.length);
+
+    // --- Botón "Solicitar visita": añade el título como parámetro ---
+const visitBtn = document.getElementById('visit-btn');
+if (visitBtn) {
+  const encodedTitle = encodeURIComponent(p.title || 'Propiedad');
+  visitBtn.href = `solicitar-visita.html?property=${encodedTitle}`;
+}
+
+  }
+
+  // === Carrusel ===
+  function initCarousel(len){
+    const track = document.getElementById('track');
+    const prev  = document.getElementById('prev');
+    const next  = document.getElementById('next');
+    let i = 0;
+    const update = () => { track.style.transform = `translateX(-${i*100}%)`; };
+    prev.addEventListener('click', e => { e.preventDefault(); i = (i-1+len)%len; update(); });
+    next.addEventListener('click', e => { e.preventDefault(); i = (i+1)%len; update(); });
+    if(len <= 1){ prev.style.display = next.style.display = 'none'; }
+
+    let startX = null;
+    track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive:true});
+    track.addEventListener('touchend', e => {
+      if(startX===null) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      if(Math.abs(dx) > 50){ i = dx < 0 ? (i+1)%len : (i-1+len)%len; update(); }
+      startX = null;
+    });
+    update();
+  }
+
+  // === Inicia carga ===
+  loadProperty();
+</script>
+<script type="module" src="js/newsletter.js"></script>
+</body>
+</html>

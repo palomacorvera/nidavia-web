@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mi cuenta · Nidavia</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header id="header-placeholder" class="header loading">
+  <div class="container nav">
+    <div class="brand-lockup" style="opacity:.5;">Cargando...</div>
+  </div>
+</header>
+
+  <main class="section container">
+    <h1>Mi cuenta</h1>
+    <section id="user-info" class="panel"></section>
+    <section id="favoritos" class="panel"></section>
+    <section id="reservas" class="panel"></section>
+  </main>
+
+<script type="module">
+  import { loadPartials } from "./js/partials-loader.js";
+  import { initAuthUI } from "./js/auth-state.js";
+  import { auth, db } from "./js/firebase-config.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+  import { collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+  // Inicializa la escucha de Auth inmediatamente (antes del header)
+  onAuthStateChanged(auth, async (user) => {
+    const userInfoBox = document.getElementById("user-info");
+    const favBox = document.getElementById("favoritos");
+    const resBox = document.getElementById("reservas");
+
+    if (!user) {
+      userInfoBox.innerHTML = `<p>Por favor, <a href="login.html">inicia sesión</a>.</p>`;
+      favBox.innerHTML = "";
+      resBox.innerHTML = "";
+      return;
+    }
+
+    // === Datos personales ===
+    userInfoBox.innerHTML = `
+      <h2>Datos personales</h2>
+      <p><strong>Nombre:</strong> ${user.displayName || "—"}</p>
+      <p><strong>Email:</strong> ${user.email}</p>
+    `;
+
+    // === Favoritos ===
+    try {
+      const favQuery = query(collection(db, "favorites"), where("uid", "==", user.uid));
+      const favSnap = await getDocs(favQuery);
+      const favs = favSnap.docs.map(d => d.data());
+      favBox.innerHTML = `<h2>Viviendas favoritas</h2>` +
+        (favs.length
+          ? `<ul>${favs.map(f => `<li><a href="detalle.html?id=${f.propertyId}">${f.title}</a></li>`).join("")}</ul>`
+          : `<p>No tienes viviendas en favoritos.</p>`);
+    } catch (err) {
+      console.error("Error cargando favoritos:", err);
+      favBox.innerHTML = "<p>No se pudieron cargar tus favoritos.</p>";
+    }
+
+// === Visitas programadas ===
+try {
+  const visitasQuery = query(collection(db, "visitas"), where("email", "==", user.email));
+  const visitasSnap = await getDocs(visitasQuery);
+  const visitas = visitasSnap.docs.map(d => d.data());
+
+  resBox.innerHTML = `<h2>Visitas programadas</h2>` +
+    (visitas.length
+      ? `<ul>${visitas.map(v => 
+          `<li>
+            <strong>${v.property || "Propiedad"}</strong><br>
+            ${v.date || ""} a las ${v.time || ""}<br>
+            <em>${v.message || ""}</em>
+          </li>`
+        ).join("")}</ul>`
+      : `<p>No tienes visitas programadas.</p>`);
+} catch (err) {
+  console.error("Error cargando visitas:", err);
+  resBox.innerHTML = "<p>No se pudieron cargar tus visitas.</p>";
+}
+
+    // === 🛠️ Acceso al panel de administración (solo Paloma) ===
+    if (user.email === "palomacorvera7107@gmail.com") {
+      const adminPanel = document.createElement("section");
+      adminPanel.classList.add("panel");
+      adminPanel.innerHTML = `
+        <h2>Panel de administración</h2>
+        <p>Accede a la gestión interna de la web:</p>
+        <a href="admin/admin.html" class="btn btn-primary">Ir al panel</a>
+      `;
+      document.querySelector("main").appendChild(adminPanel);
+    }
+  });
+
+  // Carga los partials y después inicializa el estado visual del header
+  await loadPartials();
+  initAuthUI();
+</script>
+
+</body>
+</html>
