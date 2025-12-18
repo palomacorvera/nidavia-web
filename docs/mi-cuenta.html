@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mi cuenta · Nidavia</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+
+  <style>
+    main .panel{ margin-top:18px }
+    .panel h2{ margin:.2rem 0 1rem }
+    #favoritos .cards{ margin-top:12px }
+  </style>
+</head>
+<body>
+
+<header id="header-placeholder" class="header loading">
+  <div class="container nav">
+    <div class="brand-lockup" style="opacity:.5;">Cargando...</div>
+  </div>
+</header>
+
+<main class="section container">
+  <h1>Mi cuenta</h1>
+
+  <section id="user-info" class="panel"></section>
+
+  <section id="favoritos" class="panel">
+    <h2>Viviendas favoritas</h2>
+    <div id="fav-cards" class="cards"></div>
+  </section>
+
+  <section id="reservas" class="panel"></section>
+</main>
+
+<script type="module">
+  import { loadPartials } from "./js/partials-loader.js";
+  import { initAuthUI } from "./js/auth-state.js";
+  import { auth, db } from "./js/firebase-config.js";
+  import { onAuthStateChanged } from
+    "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+  import {
+    doc, getDoc, collection, getDocs
+  } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+  import {
+    renderPropertyCard,
+    initFavoriteButtons,
+    initCarousels
+  } from "./js/property-card.js";
+
+  await loadPartials();
+  initAuthUI();
+
+  const userInfoBox = document.getElementById("user-info");
+  const favGrid = document.getElementById("fav-cards");
+  const resBox = document.getElementById("reservas");
+
+  onAuthStateChanged(auth, async (user) => {
+
+    if (!user) {
+      userInfoBox.innerHTML = `
+        <p>Por favor, <a href="login.html">inicia sesión</a>.</p>`;
+      favGrid.innerHTML = "";
+      resBox.innerHTML = "";
+      return;
+    }
+
+    /* =====================
+       DATOS PERSONALES
+       ===================== */
+    userInfoBox.innerHTML = `
+      <h2>Datos personales</h2>
+      <p><strong>Nombre:</strong> ${user.displayName || "—"}</p>
+      <p><strong>Email:</strong> ${user.email}</p>
+    `;
+
+    /* =====================
+       FAVORITOS
+       ===================== */
+    try {
+      const favRef = doc(db, "favorites", user.uid);
+      const favSnap = await getDoc(favRef);
+      const favoriteIds = new Set(
+        (favSnap.data()?.properties || []).map(String)
+      );
+
+      if (!favoriteIds.size) {
+        favGrid.innerHTML =
+          `<p style="color:var(--text-secondary)">
+             No tienes viviendas en favoritos todavía.
+           </p>`;
+      } else {
+        // cargar todas las propiedades
+        const propsSnap = await getDocs(collection(db, "properties"));
+        const allProps = [];
+        propsSnap.forEach(d =>
+          allProps.push({ id: d.id, ...d.data() })
+        );
+
+        const favProps = allProps.filter(p =>
+          favoriteIds.has(String(p.id))
+        );
+
+        const templateHTML = await fetch("./partials/property-card.html")
+          .then(r => r.text());
+
+        favGrid.innerHTML = (
+          await Promise.all(
+            favProps.map(p =>
+              renderPropertyCard({
+                property: p,
+                templateHTML,
+                isLogged: true,
+                user,
+                favorites: favoriteIds
+              })
+            )
+          )
+        ).join("");
+
+        initCarousels("#fav-cards");
+        initFavoriteButtons({ user, favorites: favoriteIds });
+
+        /* =====================
+   QUITAR FAVORITO DESDE MI CUENTA
+   ===================== */
+favGrid.querySelectorAll('.fav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+
+    // Esperamos al toggle de Firestore / clase
+    setTimeout(() => {
+      if (!btn.classList.contains('active')) {
+        const card = btn.closest('.card');
+        if (card) card.remove();
+
+        // Si no quedan favoritos, mostramos mensaje
+        if (!favGrid.querySelector('.card')) {
+          favGrid.innerHTML = `
+            <p style="color:var(--text-secondary)">
+              No tienes viviendas en favoritos todavía.
+            </p>`;
+        }
+      }
+    }, 50);
+
+  });
+});
+
+      }
+
+    } catch (e) {
+      console.error("❌ Error cargando favoritos:", e);
+      favGrid.innerHTML =
+        `<p>No se pudieron cargar tus favoritos.</p>`;
+    }
+
+    /* =====================
+       VISITAS PROGRAMADAS
+       ===================== */
+    try {
+      const visitasSnap = await getDocs(collection(db, "visitas"));
+      const visitas = visitasSnap.docs
+        .map(d => d.data())
+        .filter(v => v.email === user.email);
+
+      resBox.innerHTML = `
+        <h2>Visitas programadas</h2>
+        ${
+          visitas.length
+          ? `<ul>
+              ${visitas.map(v => `
+                <li style="margin-bottom:10px">
+                  <strong>${v.property || "Propiedad"}</strong><br>
+                  ${v.date || ""} ${v.time || ""}<br>
+                  <em>${v.message || ""}</em>
+                </li>`).join("")}
+             </ul>`
+          : `<p>No tienes visitas programadas.</p>`
+        }
+      `;
+    } catch (e) {
+      console.error("❌ Error cargando visitas:", e);
+      resBox.innerHTML =
+        `<p>No se pudieron cargar tus visitas.</p>`;
+    }
+
+    /* =====================
+       PANEL ADMIN
+       ===================== */
+    if (user.email === "palomacorvera7107@gmail.com") {
+      const admin = document.createElement("section");
+      admin.className = "panel";
+      admin.innerHTML = `
+        <h2>Panel de administración</h2>
+        <a href="admin/admin.html" class="btn btn-primary">
+          Ir al panel
+        </a>`;
+      document.querySelector("main").appendChild(admin);
+    }
+  });
+</script>
+
+<script type="module" src="js/newsletter.js"></script>
+</body>
+</html>
+ 

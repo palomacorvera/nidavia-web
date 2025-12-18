@@ -1,0 +1,34 @@
+<article class="card">
+  <div class="card-media">
+    <div class="media-carousel" data-index="0">
+      <div class="media-track">
+        {{IMAGES}}
+      </div>
+      {{ARROWS}}
+    </div>
+    <span class="badge">{{PRICE}}</span>
+    {{RIBBON}}
+  </div>
+
+  <div class="card-body">
+    <div class="card-title">
+      <h3>{{TITLE}}</h3>
+      <span class="chip">{{ICON_HOME}} {{OPERATION}}</span>
+    </div>
+
+    <div class="meta">
+      {{META}}
+    </div>
+
+    <div class="location">{{ADDRESS}}</div>
+
+    <div class="card-actions">
+      {{FAV_BUTTON}}
+      <a class="ghost-link" href="detalle.html?id={{ID}}">Ver detalle</a>
+      <a class="btn btn-outline"
+         href="solicitar-visita.html?property={{TITLE_URL}}">
+         Solicitar visita
+      </a>
+    </div>
+  </div>
+</article>

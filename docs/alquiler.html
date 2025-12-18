@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Viviendas en alquiler · Nidavia</title>
+
+  <link rel="stylesheet" href="css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+
+  <style>
+    #listado.section.dark{
+      background:var(--bg-listing);
+      color:var(--text-primary);
+      padding-block:var(--listing-gap);
+    }
+    footer{ margin-top:0; }
+    @media (min-width:900px){
+      .foot{ column-gap: clamp(32px, 7vw, 120px); }
+      .foot > :nth-child(2){ margin-left: clamp(24px, 5vw, 96px); }
+    }
+  </style>
+</head>
+
+<body>
+<header id="header-placeholder" class="header loading">
+  <div class="container nav">
+    <div class="brand-lockup" style="opacity:.5;">Cargando...</div>
+  </div>
+</header>
+
+<!-- LISTADO ALQUILER -->
+<section id="listado" class="section dark">
+  <div class="container">
+    <div class="head">
+      <h1>Viviendas en alquiler</h1>
+    </div>
+    <div id="rent-cards" class="cards"></div>
+  </div>
+</section>
+
+<script type="module">
+  import { loadPartials } from "./js/partials-loader.js";
+  import { db, auth } from "./js/firebase-config.js";
+  import {
+    collection,
+    getDocs,
+    doc,
+    getDoc
+  } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+  import { onAuthStateChanged } from
+    "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+  import { initAuthUI } from "./js/auth-state.js";
+
+  import {
+    renderPropertyCard,
+    initCarousels,
+    initFavoriteButtons
+  } from "./js/property-card.js";
+
+  /* ================= INIT ================= */
+  await loadPartials();
+  initAuthUI();
+
+  const container = document.getElementById("rent-cards");
+
+  let IS_LOGGED_IN = false;
+  let CURRENT_USER = null;
+  let USER_FAVORITES = new Set();
+  let CARD_TEMPLATE_HTML = "";
+
+  /* ================= TEMPLATE ================= */
+  async function loadCardTemplate(){
+    CARD_TEMPLATE_HTML = await fetch("partials/property-card.html")
+      .then(r => r.text());
+  }
+
+  /* ================= FAVORITOS ================= */
+  async function loadUserFavorites(uid){
+    const ref = doc(db, "favorites", uid);
+    const snap = await getDoc(ref);
+    USER_FAVORITES.clear();
+
+    if (snap.exists()){
+      (snap.data().properties || []).forEach(id =>
+        USER_FAVORITES.add(String(id))
+      );
+    }
+  }
+
+  /* ================= DATA ================= */
+  async function loadRentals(){
+    const snapshot = await getDocs(collection(db, "properties"));
+    const all = [];
+    snapshot.forEach(d => all.push({ id:d.id, ...d.data() }));
+    return all.filter(p => p.operation === "alquiler");
+  }
+
+  /* ================= RENDER ================= */
+  async function renderRentals(rentals){
+    if (!rentals.length){
+      container.innerHTML =
+        '<p style="opacity:.7">No se encontraron viviendas en alquiler.</p>';
+      return;
+    }
+
+    const html = await Promise.all(
+      rentals.map(p =>
+        renderPropertyCard({
+          property: p,
+          templateHTML: CARD_TEMPLATE_HTML,
+          isLogged: IS_LOGGED_IN,
+          user: CURRENT_USER,
+          favorites: USER_FAVORITES
+        })
+      )
+    );
+
+    container.innerHTML = html.join("");
+
+    initCarousels("#rent-cards");
+    initFavoriteButtons({
+      user: CURRENT_USER,
+      favorites: USER_FAVORITES
+    });
+  }
+
+  /* ================= FLOW ================= */
+  onAuthStateChanged(auth, async user => {
+    IS_LOGGED_IN = !!user;
+    CURRENT_USER = user;
+
+    if (user){
+      await loadUserFavorites(user.uid);
+    } else {
+      USER_FAVORITES.clear();
+    }
+
+    await loadCardTemplate();
+    const rentals = await loadRentals();
+    await renderRentals(rentals);
+  });
+</script>
+
+<script type="module" src="js/newsletter.js"></script>
+</body>
+</html>

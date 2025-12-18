@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Iniciar sesión · Nidavia</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    .section{ padding:56px 0 30px }
+    .aux{ display:flex; justify-content:space-between; align-items:center; margin-top:2px; }
+    .aux a{ color:var(--brand-primary); font-weight:600; }
+    .aux a:hover{ text-decoration:underline; text-underline-offset:4px; }
+    .auth-card .btn{ font-size:1rem; line-height:1; border-radius:28px; }
+    .header .nav-right .btn{ display:none !important }
+    .offcanvas .btn.btn-primary{ display:none !important }
+  </style>
+</head>
+
+<body>
+  <!-- Header temporal mientras carga -->
+  <header id="header-placeholder" class="header loading">
+    <div class="container nav">
+      <div class="brand-lockup" style="opacity:.5;">Cargando...</div>
+    </div>
+  </header>
+
+  <!-- ===== LOGIN ===== -->
+  <main class="section">
+    <div class="container auth-wrap">
+      <form id="login-form" class="auth-card" novalidate>
+        <div class="auth-head">
+          <h1>Iniciar sesión</h1>
+          <p class="auth-sub">Accede a tu área privada para gestionar tus propiedades y alertas.</p>
+        </div>
+
+        <div class="form-row">
+          <label class="field" aria-label="Email">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18v12H3V6Z" stroke="currentColor" stroke-width="1.6"/><path d="m3 7 9 6 9-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            <input id="email" type="email" name="email" placeholder="Email" autocomplete="username" required>
+          </label>
+
+          <label class="field" aria-label="Contraseña">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V8a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="1.6"/></svg>
+            <input id="pwd" type="password" name="password" placeholder="Contraseña" autocomplete="current-password" required>
+          </label>
+
+          <div class="aux">
+            <label style="display:inline-flex;gap:.5rem;align-items:center;color:var(--text-secondary)">
+              <input type="checkbox" onclick="document.getElementById('pwd').type=this.checked?'text':'password'"> Mostrar contraseña
+            </label>
+            <a href="#" aria-disabled="true">¿Olvidaste tu contraseña?</a>
+          </div>
+
+          <div id="login-error" class="help" role="alert" aria-live="polite"></div>
+
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
+            <a class="btn btn-outline" href="index.html">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+          </div>
+
+          <div style="text-align:center;margin-top:8px;color:var(--text-secondary)">
+            ¿No tienes cuenta?
+            <a class="ghost-link" href="signup.html" style="color:var(--brand-primary);font-weight:700">Crear cuenta</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <!-- Script principal -->
+  <script type="module">
+    import { loadPartials } from "./js/partials-loader.js";
+    import { initAuthUI } from "./js/auth-state.js";
+    import { auth } from "./js/firebase-config.js";
+    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+
+    // 1️⃣ Espera a que el header/footer estén cargados antes de iniciar la UI
+    await loadPartials();
+    initAuthUI();
+
+    // 2️⃣ Lógica de login
+    const form = document.getElementById("login-form");
+    const email = document.getElementById("email");
+    const pwd = document.getElementById("pwd");
+    const err = document.getElementById("login-error");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      err.style.display = "none";
+      err.textContent = "";
+
+      const emailVal = (email.value || "").trim();
+      const pwdVal = (pwd.value || "").trim();
+
+      if (!emailVal || !pwdVal) {
+        err.textContent = "Introduce tus credenciales.";
+        err.style.display = "block";
+        return;
+      }
+
+      try {
+        const userCred = await signInWithEmailAndPassword(auth, emailVal, pwdVal);
+        const user = userCred.user;
+        console.log("✅ Sesión iniciada:", user.email);
+        window.location.href = "mi-cuenta.html";
+      } catch (error) {
+        console.error("❌ Error al iniciar sesión:", error);
+        let msg = "Error al iniciar sesión.";
+        if (error.code === "auth/user-not-found") msg = "No existe ninguna cuenta con este correo.";
+        else if (error.code === "auth/wrong-password" || error.code === "auth/invalid-credential")
+          msg = "Usuario o contraseña incorrectos.";
+        else if (error.code === "auth/too-many-requests") msg = "Demasiados intentos fallidos. Intenta más tarde.";
+        err.textContent = msg;
+        err.style.display = "block";
+      }
+    });
+  </script>
+
+  <script type="module" src="js/newsletter.js"></script>
+</body>
+</html>

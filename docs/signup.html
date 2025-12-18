@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Crear cuenta · Nidavia</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+/* Oculta CTAs del header y del offcanvas para no duplicar acciones aquí */
+.header .nav-right .btn{ display:none !important; }
+.offcanvas .btn.btn-primary{ display:none !important; }
+.auth-card .btn{
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.field.error input {
+  border-color: #d43535 !important;
+}
+
+.help {
+  color: #d43535;
+  margin-top: 8px;
+}
+  </style>
+</head>
+<body>
+<header id="header-placeholder" class="header loading">
+  <div class="container nav">
+    <div class="brand-lockup" style="opacity:.5;">Cargando...</div>
+  </div>
+</header>
+
+  <!-- ===== SIGNUP ===== -->
+  <main class="section">
+    <div class="container auth-wrap">
+      <form id="signup-form" class="auth-card" novalidate>
+        <div class="auth-head">
+          <h1>Crear cuenta</h1>
+          <p class="auth-sub">Regístrate para guardar favoritos, crear alertas y gestionar tus solicitudes.</p>
+        </div>
+
+        <div class="form-row">
+          <label class="field" aria-label="Nombre completo" id="f-name">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Zm-8 9a8 8 0 0 1 16 0" stroke="currentColor" stroke-width="1.6"/></svg>
+            <input type="text" name="name" placeholder="Nombre completo *" autocomplete="name" required>
+          </label>
+
+          <label class="field" aria-label="Email" id="f-email">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M3 6h18v12H3V6Z" stroke="currentColor" stroke-width="1.6"/><path d="m3 7 9 6 9-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            <input type="email" name="email" placeholder="Email *" autocomplete="email" required>
+          </label>
+
+          <label class="field" aria-label="Contraseña" id="f-pass">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V8a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="1.6"/></svg>
+            <input id="pwd" type="password" name="password" placeholder="Contraseña (mín. 6) *" autocomplete="new-password" required>
+          </label>
+
+          <label class="field" aria-label="Repite la contraseña" id="f-pass2">
+            <svg viewBox="0 0 24 24" fill="none"><rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V8a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="1.6"/></svg>
+            <input id="pwd2" type="password" name="password2" placeholder="Repite la contraseña *" autocomplete="new-password" required>
+          </label>
+
+          <div class="aux">
+            <label style="display:inline-flex;gap:.5rem;align-items:center;color:var(--text-secondary)">
+              <input id="show" type="checkbox"> Mostrar contraseñas
+            </label>
+            <span></span>
+          </div>
+
+          <label class="field" aria-label="Teléfono (opcional)">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 5a2 2 0 0 1 2-2h2l2 4-2 2a12 12 0 0 0 6 6l2-2 4 2v2a2 2 0 0 1-2 2h-1C9.82 19 5 14.18 5 8V7a2 2 0 0 1-1-2Z" stroke="currentColor" stroke-width="1.6"/></svg>
+            <input type="tel" name="phone" placeholder="Teléfono (opcional)" autocomplete="tel">
+          </label>
+
+          <label class="consent">
+  <input id="gdpr" type="checkbox" required>
+  <label class="consent">
+  <span>Acepto la <a class="ghost-link" href="#">Política de privacidad</a>. *</span>
+</label>
+
+</label>
+          <div id="signup-error" class="help" role="alert" aria-live="polite"></div>
+
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
+            <a class="btn btn-outline" href="index.html">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Crear cuenta</button>
+          </div>
+
+          <div style="text-align:center;margin-top:8px;color:var(--text-secondary)">
+            ¿Ya tienes cuenta?
+            <a class="ghost-link" href="login.html" style="color:var(--brand-primary);font-weight:700">Iniciar sesión</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+
+<script type="module">
+  import { createUserWithEmailAndPassword, updateProfile } 
+    from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+  import { auth, db } from "./js/firebase-config.js";
+  import { collection, addDoc, serverTimestamp } 
+    from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+  import { loadPartials } from "./js/partials-loader.js";
+  import { initAuthUI } from "./js/auth-state.js";
+
+  await loadPartials();
+  initAuthUI();
+
+  // Mostrar / ocultar contraseñas
+  document.getElementById('show').addEventListener('change', (e)=>{
+    const type = e.target.checked ? 'text' : 'password';
+    document.getElementById('pwd').type  = type;
+    document.getElementById('pwd2').type = type;
+  });
+
+  // Validación y registro
+  const form  = document.getElementById('signup-form');
+  const errEl = document.getElementById('signup-error');
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  errEl.style.display = "none";
+  errEl.textContent = "";
+
+  // Limpia clases de error
+  document.querySelectorAll(".field").forEach(f => f.classList.remove("error"));
+
+  const name   = (form.name.value || "").trim();
+  const email  = (form.email.value || "").trim();
+  const pass   = (form.password.value || "").trim();
+  const pass2  = (form.password2.value || "").trim();
+  const phone  = (form.phone.value || "").trim();
+  const gdprOk = document.getElementById("gdpr").checked;
+
+  // Regex básicos
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^[0-9+\-\s]{6,20}$/;
+
+  // START VALIDACIONES 
+  if (!name || name.split(" ").length < 2) {
+    showError("Introduce tu nombre completo.", "f-name");
+    return;
+  }
+
+  if (!email) {
+    showError("Introduce tu email.", "f-email");
+    return;
+  }
+
+  if (!emailRegex.test(email)) {
+    showError("Introduce un email válido.", "f-email");
+    return;
+  }
+
+  if (!pass) {
+    showError("Introduce una contraseña.", "f-pass");
+    return;
+  }
+
+  if (pass.length < 6) {
+    showError("La contraseña debe tener al menos 6 caracteres.", "f-pass");
+    return;
+  }
+
+  if (!pass2) {
+    showError("Repite la contraseña.", "f-pass2");
+    return;
+  }
+
+  if (pass !== pass2) {
+    showError("Las contraseñas no coinciden.", "f-pass2");
+    return;
+  }
+
+  if (phone && !phoneRegex.test(phone)) {
+    showError("Introduce un teléfono válido.", "f-phone");
+    return;
+  }
+
+  if (!gdprOk) {
+    showError("Debes aceptar la política de privacidad.");
+    return;
+  }
+  // END VALIDACIONES
+
+  try {
+    const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+    const user = userCred.user;
+
+    await updateProfile(user, { displayName: name });
+
+    await addDoc(collection(db, "users"), {
+      uid: user.uid,
+      name,
+      email,
+      phone: phone || null,
+      createdAt: serverTimestamp()
+    });
+
+    window.location.href = "signup-success.html";
+  } catch (error) {
+    console.error("❌ Error registrando usuario:", error);
+
+    let msg = "Error al crear la cuenta. Intenta de nuevo.";
+    if (error.code === "auth/email-already-in-use") msg = "Este email ya está registrado.";
+    if (error.code === "auth/invalid-email") msg = "El email no es válido.";
+    if (error.code === "auth/weak-password") msg = "La contraseña es demasiado débil.";
+
+    errEl.textContent = msg;
+    errEl.style.display = "block";
+  }
+});
+
+function showError(msg, fieldId = null) {
+  errEl.textContent = msg;
+  errEl.style.display = "block";
+
+  if (fieldId) {
+    const el = document.getElementById(fieldId);
+    if (el) el.classList.add("error");
+  }
+}
+
+</script>
+
+<script type="module" src="js/newsletter.js"></script>
+</body>
+</html>
